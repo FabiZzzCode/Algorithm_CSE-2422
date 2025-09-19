@@ -1,1 +1,30 @@
+#include<bits/stdc++.h>
+using namespace std;
 
+int main(){
+    int n;
+    cout << "array size: ";
+    cin>> n;
+
+    int arr[n+123];
+    cout << "unsorted array: ";
+    for(int i = 0; i<n; i++){
+        cin >> arr[i];
+    }
+
+    int mini, m;
+    for(int i = 0; i<n-1; i++){
+        mini = arr[i];
+        for(int j = i+1; j<n; j++){
+            if(mini > arr[j]){
+                mini = arr[j];
+                m = j;
+            }
+        }
+        swap(arr[m], arr[i]);
+    }
+    cout << "sorted array : ";
+     for(int i = 0; i<n; i++){
+        cout << arr[i] << " ";
+    }
+}
