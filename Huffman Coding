@@ -1,85 +1,58 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-class Node {
-public:
-    char ch;
-    int freq;
-    Node *left, *right;
-    Node(char c, int f) {
-        ch = c;
-        freq = f;
-        left = right = nullptr;
+int main(){
+    //BCCABBDDAECCBBAEDDCC
+    string text;
+    cin>>text;
+
+    map<char, int> freq;
+    for(char c:text) freq[c]++;
+
+    cout << "Frequencies : "<<endl;
+    for (auto it : freq) {
+        cout << it.first <<" : "<< it.second << endl;
     }
-};
+    cout<<endl;
 
-class Compare {
-public:
-    bool operator()(Node* a, Node* b) {
-        return a->freq > b->freq;
-    }
-};
+    priority_queue<pair<int,string>, vector<pair<int,string>>, greater<pair<int,string>>> pq;
 
-void generateCodes(Node* root, string curr, unordered_map<char,string> &codes) {
-    if (root == nullptr) return;
-
-    if (root->left == nullptr && root->right == nullptr) {
-        codes[root->ch] = curr;
-        return;
-    }
-    generateCodes(root->left, curr + "0", codes);
-    generateCodes(root->right, curr + "1", codes);
-}
-
-int main() {
-    string msg;
-    cout << "Enter your message: ";
-    getline(cin, msg);
-
-    unordered_map<char, int> freq;
-    for (char c : msg) freq[c]++;
-
-    priority_queue<Node*, vector<Node*>, Compare> pq;
-
-    for (auto &p : freq)
-        pq.push(new Node(p.first, p.second));
-
-    while (pq.size() >= 2) {
-        Node* left = pq.top(); pq.pop();
-        Node* right = pq.top(); pq.pop();
-
-        Node* merged = new Node('\0', left->freq + right->freq);
-        merged->left = left;
-        merged->right = right;
-
-        pq.push(merged);
+    for(auto it:freq){
+        pq.push({it.second, string(1, it.first)});
     }
 
-    Node* root = pq.top();
+    map<char,string> code;
 
-    unordered_map<char,string> codes;
-    generateCodes(root, "", codes);
+    while(pq.size() > 1) {
+        auto left = pq.top(); pq.pop();
+        auto right = pq.top(); pq.pop();
 
-    string encoded = "";
-    for (char c : msg) {
-        encoded += codes[c];
+        for(char c : left.second) code[c] = "0" + code[c];
+        for(char c : right.second) code[c] = "1" + code[c];
+
+        pq.push({left.first + right.first, left.second + right.second});
     }
 
-    int originalBits = msg.length() * 8;
-    int compressedBits = encoded.length();
-    int savedBits = originalBits - compressedBits;
+    cout << "Huffman Codes : "<<endl;
 
-    cout << "\nHuffman Codes:\n";
-    for (auto &p : codes)
-        cout << p.first << " : " << p.second << "\n";
+    for (auto it : freq) {
+        cout<<it.first <<" : "<< code[it.first]<<endl;
+    }
+    cout<<endl;
 
-    cout << "\nEncoded Message:\n" << encoded << "\n";
+    int original= text.length()*8;
+    int compressed = 0;
+    int table_bits = 0;
 
-    cout << "\n-----------------------------\n";
-    cout << "Original Size    : " << originalBits << " bits\n";
-    cout << "Compressed Size  : " << compressedBits << " bits\n";
-    cout << "Bit Reduction    : " << savedBits << " bits\n";
-    cout << "-----------------------------\n";
+    for(auto it : freq) {
+        compressed += it.second * code[it.first].length();
+        table_bits += 8 + code[it.first].length();
+    }
+
+    cout <<"Original Length : "<< original << endl;
+    cout<<"Compressed msg length : "<<compressed<<endl;
+    cout<<"Table : "<<table_bits<<endl;
+    cout <<"New length : "<< compressed + table_bits << endl;
 
     return 0;
 }
